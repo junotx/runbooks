@@ -1,0 +1,23 @@
+# generate the site 
+
+FROM klakegg/hugo:0.104.3-ext-alpine as builder
+
+RUN apk update && apk add --no-cache git && \
+    apk add --no-cache make && \
+    apk add --no-cache bash && \
+    apk add --no-cache gcc && \
+    apk add --no-cache libc-dev && \
+    apk add --no-cache binutils-gold
+
+WORKDIR /workspace
+
+COPY . .
+
+RUN git submodule update --init
+RUN hugo
+
+
+# copy the site 
+
+FROM nginx:alpine
+COPY --from=builder /workspace/public/ /usr/share/nginx/html/
